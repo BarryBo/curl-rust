@@ -12,7 +12,7 @@ extern crate openssl_sys;
 extern crate rustls_ffi;
 
 use libc::c_ulong;
-use libc::{c_char, c_double, c_int, c_long, c_short, c_uint, c_void, size_t, time_t};
+use libc::{c_char, c_double, c_int, c_long, c_short, c_uint, c_void, size_t};
 
 #[cfg(unix)]
 pub use libc::fd_set;
@@ -104,6 +104,8 @@ pub const CURLFINFOFLAG_KNOWN_UID: c_uint = 1 << 4;
 pub const CURLFINFOFLAG_KNOWN_GID: c_uint = 1 << 5;
 pub const CURLFINFOFLAG_KNOWN_SIZE: c_uint = 1 << 6;
 pub const CURLFINFOFLAG_KNOWN_HLINKCOUNT: c_uint = 1 << 7;
+
+pub type time_t = i64;
 
 #[repr(C)]
 pub struct curl_fileinfo {

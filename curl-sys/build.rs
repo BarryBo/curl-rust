@@ -29,20 +29,7 @@ fn main() {
 
     // If the static-curl feature is disabled, probe for a system-wide libcurl.
     if !cfg!(feature = "static-curl") {
-        // OSX ships libcurl by default, so we just use that version
-        // so long as it has the right features enabled.
-        if target.contains("apple") && (!cfg!(feature = "http2") || curl_config_reports_http2()) {
-            return println!("cargo:rustc-flags=-l curl");
-        }
-
-        // Next, fall back and try to use pkg-config if its available.
-        if windows {
-            if try_vcpkg() {
-                return;
-            }
-        } else if try_pkg_config() {
-            return;
-        }
+        return println!("cargo:rustc-flags=-L/opt/azurespheresdk/Sysroots/12/usr/lib/ -l curl");
     }
 
     if !Path::new("curl/.git").exists() {
@@ -419,6 +406,7 @@ fn main() {
     }
 }
 
+#[allow(dead_code)]
 #[cfg(not(target_env = "msvc"))]
 fn try_vcpkg() -> bool {
     false
@@ -477,6 +465,7 @@ fn try_vcpkg() -> bool {
     false
 }
 
+#[allow(dead_code)]
 fn try_pkg_config() -> bool {
     let mut cfg = pkg_config::Config::new();
     cfg.cargo_metadata(false);

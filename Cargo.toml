@@ -23,7 +23,6 @@ socket2 = "0.4.0"
 
 # Unix platforms use OpenSSL for now to provide SSL functionality
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
-openssl-sys = { version = "0.9.43", optional = true }
 openssl-probe = { version = "0.1.2", optional = true }
 
 [target.'cfg(target_env = "msvc")'.dependencies]
@@ -40,7 +39,7 @@ members = ["systest"]
 
 [features]
 default = ["ssl"]
-ssl = ["openssl-sys", "openssl-probe", "curl-sys/ssl"] # OpenSSL/system TLS backend
+ssl = ["curl-sys/ssl"] # OpenSSL/system TLS backend
 mesalink = ["curl-sys/mesalink"] # MesaLink TLS backend
 http2 = ["curl-sys/http2"]
 spnego = ["curl-sys/spnego"]
