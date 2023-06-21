@@ -18,8 +18,8 @@ appveyor = { repository = "alexcrichton/curl-rust" }
 
 [dependencies]
 libc = "0.2.42"
-curl-sys = { path = "curl-sys", version = "0.4.56", default-features = false }
-socket2 = "0.4.0"
+curl-sys = { path = "curl-sys", version = "0.4.59", default-features = false }
+socket2 = "0.5.0"
 
 # Unix platforms use OpenSSL for now to provide SSL functionality
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
@@ -46,9 +46,10 @@ spnego = ["curl-sys/spnego"]
 rustls = ["curl-sys/rustls"]
 static-curl = ["curl-sys/static-curl"]
 static-ssl = ["curl-sys/static-ssl"]
+windows-static-ssl = ["static-curl", "curl-sys/windows-static-ssl"]
 force-system-lib-on-osx = ['curl-sys/force-system-lib-on-osx']
 protocol-ftp = ["curl-sys/protocol-ftp"]
-zlib-ng-compat = ["curl-sys/zlib-ng-compat", "static-curl"]
+#zlib-ng-compat = ["curl-sys/zlib-ng-compat", "static-curl"]
 upkeep_7_62_0 = ["curl-sys/upkeep_7_62_0"]
 poll_7_68_0 = ["curl-sys/poll_7_68_0"]
 ntlm = ["curl-sys/ntlm"]
@@ -70,6 +71,11 @@ required-features = ["ssl"]
 name = "ssl_cert_blob"
 path = "examples/ssl_cert_blob.rs"
 required-features = ["ssl"]
+
+[[example]]
+name = "ssl_client_auth"
+path = "examples/ssl_client_auth.rs"
+required-features = []
 
 [[example]]
 name = "aws_sigv4"

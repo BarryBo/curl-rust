@@ -1,6 +1,6 @@
 [package]
 name = "curl-sys"
-version = "0.4.56+curl-7.83.1"
+version = "0.4.63+curl-8.1.2"
 authors = ["Alex Crichton <alex@alexcrichton.com>"]
 links = "curl"
 build = "build.rs"
@@ -45,6 +45,7 @@ http2 = ["libnghttp2-sys"]
 mesalink = []
 rustls = ["rustls-ffi"]
 static-curl = []
+windows-static-ssl = []
 static-ssl = []
 spnego = []
 force-system-lib-on-osx = []

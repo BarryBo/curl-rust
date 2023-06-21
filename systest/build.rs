@@ -52,7 +52,7 @@ fn main() {
                 _ => {}
             }
         }
-        if version < 70 {
+        if version < 87 {
             match s {
                 "curl_version_info_data" => return true,
                 _ => {}
@@ -62,18 +62,25 @@ fn main() {
         false
     });
 
+    // Version symbols are extracted from https://curl.se/libcurl/c/symbols-in-versions.html
     cfg.skip_const(move |s| {
+        if version < 87 {
+            match s {
+                "CURLVERSION_ELEVENTH" | "CURLVERSION_NOW" => return true,
+                _ => {}
+            }
+        }
         if version < 77 {
             match s {
                 "CURLVERSION_TENTH"
                 | "CURLOPT_CAINFO_BLOB"
                 | "CURLOPT_PROXY_CAINFO_BLOB"
-                | "CURLVERSION_NOW"
                 | "CURL_VERSION_ALTSVC"
                 | "CURL_VERSION_ZSTD"
                 | "CURL_VERSION_UNICODE"
                 | "CURL_VERSION_HSTS"
-                | "CURL_VERSION_GSASL" => return true,
+                | "CURL_VERSION_GSASL"
+                | "CURLSSLOPT_AUTO_CLIENT_CERT" => return true,
                 _ => {}
             }
         }
@@ -110,15 +117,29 @@ fn main() {
                 | "CURLOPT_ISSUERCERT_BLOB"
                 | "CURLOPTTYPE_BLOB"
                 | "CURL_BLOB_NOCOPY"
-                | "CURL_BLOB_COPY" => return true,
+                | "CURL_BLOB_COPY"
+                | "CURLSSLOPT_NATIVE_CA" => return true,
                 _ => {}
             }
         }
         if version < 70 {
             match s {
-                "CURL_VERSION_HTTP3" | "CURL_VERSION_BROTLI" | "CURLVERSION_SEVENTH" => {
-                    return true
-                }
+                "CURL_VERSION_HTTP3"
+                | "CURL_VERSION_BROTLI"
+                | "CURLVERSION_SEVENTH"
+                | "CURLSSLOPT_REVOKE_BEST_EFFORT" => return true,
+                _ => {}
+            }
+        }
+        if version < 68 {
+            match s {
+                "CURLSSLOPT_NO_PARTIALCHAIN" => return true,
+                _ => {}
+            }
+        }
+        if version < 67 {
+            match s {
+                "CURLMOPT_MAX_CONCURRENT_STREAMS" => return true,
                 _ => {}
             }
         }
@@ -190,7 +211,8 @@ fn main() {
                 | "CURLOPT_PROXY_SSLCERTTYPE"
                 | "CURLOPT_PROXY_SSLKEY"
                 | "CURLOPT_PROXY_SSLKEYTYPE"
-                | "CURLOPT_PROXY_SSLVERSION" => return true,
+                | "CURLOPT_PROXY_SSLVERSION"
+                | "CURL_VERSION_HTTPS_PROXY" => return true,
                 _ => {}
             }
         }
@@ -201,16 +223,26 @@ fn main() {
                 _ => {}
             }
         }
-
         if version < 47 {
             if s.starts_with("CURL_HTTP_VERSION_2") {
                 return true;
             }
         }
-
+        if version < 44 {
+            match s {
+                "CURLMOPT_PUSHDATA" | "CURLMOPT_PUSHFUNCTION" => return true,
+                _ => {}
+            }
+        }
         if version < 43 {
             if s.starts_with("CURLPIPE_") {
                 return true;
+            }
+        }
+        if version < 25 {
+            match s {
+                "CURLSSLOPT_ALLOW_BEAST" => return true,
+                _ => {}
             }
         }
 
@@ -218,7 +250,8 @@ fn main() {
         s == "CURLSSLOPT_NO_REVOKE" ||
 
         // A lot of curl versions doesn't support unix sockets
-        s == "CURLOPT_UNIX_SOCKET_PATH" || s == "CURL_VERSION_UNIX_SOCKETS"
+        s == "CURLOPT_UNIX_SOCKET_PATH" || s == "CURL_VERSION_UNIX_SOCKETS" || s ==
+            "CURLOPT_ABSTRACT_UNIX_SOCKET"
     });
 
     if cfg!(target_env = "msvc") {

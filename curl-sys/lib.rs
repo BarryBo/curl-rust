@@ -1,5 +1,5 @@
 #![allow(bad_style)]
-#![doc(html_root_url = "https://docs.rs/curl-sys/0.3")]
+#![doc(html_root_url = "https://docs.rs/curl-sys/0.4")]
 
 // These `extern crate` are required for conditional linkages of curl.
 #[cfg(link_libnghttp2)]
@@ -607,6 +607,8 @@ pub const CURLOPT_PROXY_SSL_CIPHER_LIST: CURLoption = CURLOPTTYPE_OBJECTPOINT + 
 pub const CURLOPT_PROXY_CRLFILE: CURLoption = CURLOPTTYPE_OBJECTPOINT + 260;
 pub const CURLOPT_PROXY_SSL_OPTIONS: CURLoption = CURLOPTTYPE_LONG + 261;
 
+pub const CURLOPT_ABSTRACT_UNIX_SOCKET: CURLoption = CURLOPTTYPE_OBJECTPOINT + 264;
+
 pub const CURLOPT_DOH_URL: CURLoption = CURLOPTTYPE_OBJECTPOINT + 279;
 pub const CURLOPT_UPLOAD_BUFFERSIZE: CURLoption = CURLOPTTYPE_LONG + 280;
 
@@ -637,6 +639,10 @@ pub const CURL_IPRESOLVE_V6: c_int = 2;
 
 pub const CURLSSLOPT_ALLOW_BEAST: c_long = 1 << 0;
 pub const CURLSSLOPT_NO_REVOKE: c_long = 1 << 1;
+pub const CURLSSLOPT_NO_PARTIALCHAIN: c_long = 1 << 2;
+pub const CURLSSLOPT_REVOKE_BEST_EFFORT: c_long = 1 << 3;
+pub const CURLSSLOPT_NATIVE_CA: c_long = 1 << 4;
+pub const CURLSSLOPT_AUTO_CLIENT_CERT: c_long = 1 << 5;
 
 /// These enums are for use with the CURLOPT_HTTP_VERSION option.
 ///
@@ -710,6 +716,12 @@ pub const CURL_FORMADD_UNKNOWN_OPTION: CURLFORMcode = 4;
 pub const CURL_FORMADD_INCOMPLETE: CURLFORMcode = 5;
 pub const CURL_FORMADD_ILLEGAL_ARRAY: CURLFORMcode = 6;
 pub const CURL_FORMADD_DISABLED: CURLFORMcode = 7;
+
+pub const CURL_REDIR_POST_301: c_ulong = 1;
+pub const CURL_REDIR_POST_302: c_ulong = 2;
+pub const CURL_REDIR_POST_303: c_ulong = 4;
+pub const CURL_REDIR_POST_ALL: c_ulong =
+    CURL_REDIR_POST_301 | CURL_REDIR_POST_302 | CURL_REDIR_POST_303;
 
 #[repr(C)]
 pub struct curl_forms {
@@ -860,7 +872,8 @@ pub const CURLVERSION_SEVENTH: CURLversion = 6;
 pub const CURLVERSION_EIGHTH: CURLversion = 7;
 pub const CURLVERSION_NINTH: CURLversion = 8;
 pub const CURLVERSION_TENTH: CURLversion = 9;
-pub const CURLVERSION_NOW: CURLversion = CURLVERSION_TENTH;
+pub const CURLVERSION_ELEVENTH: CURLversion = 10;
+pub const CURLVERSION_NOW: CURLversion = CURLVERSION_ELEVENTH;
 
 #[repr(C)]
 pub struct curl_version_info_data {
@@ -889,6 +902,7 @@ pub struct curl_version_info_data {
     pub zstd_version: *const c_char,
     pub hyper_version: *const c_char,
     pub gsasl_version: *const c_char,
+    pub feature_names: *const *const c_char,
 }
 
 pub const CURL_VERSION_IPV6: c_int = 1 << 0;
@@ -909,6 +923,7 @@ pub const CURL_VERSION_TLSAUTH_SRP: c_int = 1 << 14;
 pub const CURL_VERSION_NTLM_WB: c_int = 1 << 15;
 pub const CURL_VERSION_HTTP2: c_int = 1 << 16;
 pub const CURL_VERSION_UNIX_SOCKETS: c_int = 1 << 19;
+pub const CURL_VERSION_HTTPS_PROXY: c_int = 1 << 21;
 pub const CURL_VERSION_BROTLI: c_int = 1 << 23;
 pub const CURL_VERSION_ALTSVC: c_int = 1 << 24;
 pub const CURL_VERSION_HTTP3: c_int = 1 << 25;
@@ -985,6 +1000,9 @@ pub const CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE: CURLMoption = CURLOPTTYPE_OFF_T + 
 pub const CURLMOPT_PIPELINING_SITE_BL: CURLMoption = CURLOPTTYPE_OBJECTPOINT + 11;
 pub const CURLMOPT_PIPELINING_SERVER_BL: CURLMoption = CURLOPTTYPE_OBJECTPOINT + 12;
 pub const CURLMOPT_MAX_TOTAL_CONNECTIONS: CURLMoption = CURLOPTTYPE_LONG + 13;
+pub const CURLMOPT_PUSHFUNCTION: CURLMoption = CURLOPTTYPE_FUNCTIONPOINT + 14;
+pub const CURLMOPT_PUSHDATA: CURLMoption = CURLOPTTYPE_OBJECTPOINT + 15;
+pub const CURLMOPT_MAX_CONCURRENT_STREAMS: CURLMoption = CURLOPTTYPE_LONG + 16;
 
 // These enums are for use with the CURLMOPT_PIPELINING option.
 pub const CURLPIPE_NOTHING: c_long = 0;

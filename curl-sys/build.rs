@@ -5,7 +5,6 @@ use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-changed=curl");
-    let host = env::var("HOST").unwrap();
     let target = env::var("TARGET").unwrap();
     let windows = target.contains("windows");
 
@@ -20,21 +19,14 @@ fn main() {
         return println!("cargo:rustc-flags=-l curl");
     }
 
-    // When cross-compiling for Haiku, use the system's default supplied
-    // libcurl (it supports http2). This is in the case where rustc and
-    // cargo are built for Haiku, which is done from a Linux host.
-    if host != target && target.contains("haiku") {
-        return println!("cargo:rustc-flags=-l curl");
-    }
-
     // If the static-curl feature is disabled, probe for a system-wide libcurl.
     if !cfg!(feature = "static-curl") {
-        return println!("cargo:rustc-flags=-L/opt/azurespheresdk/Sysroots/15/usr/lib/ -l curl");
+        return println!("cargo:rustc-flags=-L/opt/azurespheresdk/Sysroots/16/usr/lib/ -l curl");
     }
 
     if !Path::new("curl/.git").exists() {
         let _ = Command::new("git")
-            .args(&["submodule", "update", "--init"])
+            .args(&["submodule", "update", "--init", "curl"])
             .status();
     }
 
@@ -70,6 +62,7 @@ fn main() {
         "system.h",
         "urlapi.h",
         "typecheck-gcc.h",
+        "websockets.h",
     ]
     .iter()
     {
@@ -94,7 +87,7 @@ fn main() {
             .replace("@LIBCURL_LIBS@", "")
             .replace("@SUPPORT_FEATURES@", "")
             .replace("@SUPPORT_PROTOCOLS@", "")
-            .replace("@CURLVERSION@", "7.61.1"),
+            .replace("@CURLVERSION@", "8.1.2"),
     )
     .unwrap();
 
@@ -126,38 +119,48 @@ fn main() {
         .file("curl/lib/asyn-thread.c")
         .file("curl/lib/altsvc.c")
         .file("curl/lib/base64.c")
+        .file("curl/lib/bufq.c")
         .file("curl/lib/bufref.c")
+        .file("curl/lib/cfilters.c")
+        .file("curl/lib/cf-h1-proxy.c")
+        .file("curl/lib/cf-haproxy.c")
+        .file("curl/lib/cf-https-connect.c")
+        .file("curl/lib/cf-socket.c")
         .file("curl/lib/conncache.c")
         .file("curl/lib/connect.c")
         .file("curl/lib/content_encoding.c")
         .file("curl/lib/cookie.c")
         .file("curl/lib/curl_addrinfo.c")
-        .file("curl/lib/curl_ctype.c")
         .file("curl/lib/curl_get_line.c")
+        .file("curl/lib/curl_log.c")
         .file("curl/lib/curl_memrchr.c")
         .file("curl/lib/curl_range.c")
         .file("curl/lib/curl_threads.c")
-        .file("curl/lib/dotdot.c")
         .file("curl/lib/doh.c")
         .file("curl/lib/dynbuf.c")
+        .file("curl/lib/dynhds.c")
         .file("curl/lib/easy.c")
         .file("curl/lib/escape.c")
         .file("curl/lib/file.c")
         .file("curl/lib/fileinfo.c")
+        .file("curl/lib/fopen.c")
         .file("curl/lib/formdata.c")
         .file("curl/lib/getenv.c")
         .file("curl/lib/getinfo.c")
         .file("curl/lib/hash.c")
+        .file("curl/lib/headers.c")
         .file("curl/lib/hmac.c")
         .file("curl/lib/hostasyn.c")
         .file("curl/lib/hostip.c")
         .file("curl/lib/hostip6.c")
         .file("curl/lib/hsts.c")
         .file("curl/lib/http.c")
+        .file("curl/lib/http1.c")
         .file("curl/lib/http_aws_sigv4.c")
         .file("curl/lib/http_chunks.c")
         .file("curl/lib/http_digest.c")
         .file("curl/lib/http_proxy.c")
+        .file("curl/lib/idn.c")
         .file("curl/lib/if2ip.c")
         .file("curl/lib/inet_ntop.c")
         .file("curl/lib/inet_pton.c")
@@ -169,6 +172,7 @@ fn main() {
         .file("curl/lib/multi.c")
         .file("curl/lib/netrc.c")
         .file("curl/lib/nonblock.c")
+        .file("curl/lib/noproxy.c")
         .file("curl/lib/parsedate.c")
         .file("curl/lib/progress.c")
         .file("curl/lib/rand.c")
@@ -195,11 +199,14 @@ fn main() {
         .file("curl/lib/version.c")
         .file("curl/lib/vauth/digest.c")
         .file("curl/lib/vauth/vauth.c")
+        .file("curl/lib/vquic/curl_msh3.c")
+        .file("curl/lib/vquic/curl_ngtcp2.c")
+        .file("curl/lib/vquic/curl_quiche.c")
+        .file("curl/lib/vquic/vquic.c")
         .file("curl/lib/vtls/hostcheck.c")
         .file("curl/lib/vtls/keylog.c")
         .file("curl/lib/vtls/vtls.c")
         .file("curl/lib/warnless.c")
-        .file("curl/lib/wildcard.c")
         .file("curl/lib/timediff.c")
         .define("HAVE_GETADDRINFO", None)
         .define("HAVE_GETPEERNAME", None)
@@ -232,7 +239,7 @@ fn main() {
     if cfg!(feature = "http2") {
         cfg.define("USE_NGHTTP2", None)
             .define("NGHTTP2_STATICLIB", None)
-            .file("curl/lib/h2h3.c")
+            .file("curl/lib/cf-h2-proxy.c")
             .file("curl/lib/http2.c");
 
         println!("cargo:rustc-cfg=link_libnghttp2");
@@ -259,6 +266,26 @@ fn main() {
         cfg.define("USE_RUSTLS", None)
             .file("curl/lib/vtls/rustls.c")
             .include(env::var_os("DEP_RUSTLS_FFI_INCLUDE").unwrap());
+    } else if cfg!(feature = "windows-static-ssl") {
+        if windows {
+            cfg.define("USE_OPENSSL", None)
+                .file("curl/lib/vtls/openssl.c");
+            // We need both openssl and zlib
+            // Those can be installed with
+            // ```shell
+            // git clone https://github.com/microsoft/vcpkg
+            // cd vcpkg
+            // ./bootstrap-vcpkg.bat -disableMetrics
+            // ./vcpkg.exe integrate install
+            // ./vcpkg.exe install openssl:x64-windows-static-md
+            // ```
+            #[cfg(target_env = "msvc")]
+            vcpkg::Config::new().find_package("openssl").ok();
+            #[cfg(target_env = "msvc")]
+            vcpkg::Config::new().find_package("zlib").ok();
+        } else {
+            panic!("Not available on non windows platform")
+        }
     } else if cfg!(feature = "ssl") {
         if windows {
             // For windows, spnego feature is auto on in case ssl feature is on.
@@ -323,6 +350,7 @@ fn main() {
             .define("HAVE_FCNTL_O_NONBLOCK", None)
             .define("HAVE_SYS_SELECT_H", None)
             .define("HAVE_SYS_STAT_H", None)
+            .define("HAVE_SYS_TIME_H", None)
             .define("HAVE_UNISTD_H", None)
             .define("HAVE_RECV", None)
             .define("HAVE_SELECT", None)
@@ -350,7 +378,6 @@ fn main() {
 
         if target.contains("-apple-") {
             cfg.define("__APPLE__", None)
-                .define("macintosh", None)
                 .define("HAVE_MACH_ABSOLUTE_TIME", None);
         } else {
             cfg.define("HAVE_CLOCK_GETTIME_MONOTONIC", None)
