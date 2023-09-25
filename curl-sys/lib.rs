@@ -1,6 +1,9 @@
 #![allow(bad_style)]
 #![doc(html_root_url = "https://docs.rs/curl-sys/0.4")]
 
+#[link(name = "curl", kind = "dylib")]
+extern "C" {}
+
 // These `extern crate` are required for conditional linkages of curl.
 #[cfg(link_libnghttp2)]
 extern crate libnghttp2_sys;

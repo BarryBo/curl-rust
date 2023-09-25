@@ -21,9 +21,7 @@ fn main() {
 
     // If the static-curl feature is disabled, probe for a system-wide libcurl.
     if !cfg!(feature = "static-curl") {
-        return println!(
-            "cargo:rustc-flags=-L/opt/azurespheresdk/Sysroots/16/usr/lib/ -l dylib:curl"
-        );
+        return println!("cargo:rustc-flags=-L/opt/azurespheresdk/Sysroots/16/usr/lib/");
     }
 
     if !Path::new("curl/.git").exists() {
