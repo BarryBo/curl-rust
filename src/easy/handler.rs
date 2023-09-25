@@ -112,7 +112,7 @@ pub trait Handler {
     /// `transfer` method and then using `read_function` to configure a
     /// callback that can reference stack-local data.
     fn read(&mut self, data: &mut [u8]) -> Result<usize, ReadError> {
-        drop(data);
+        let _ = data; // ignore unused
         Ok(0)
     }
 
@@ -136,7 +136,7 @@ pub trait Handler {
     /// By default data this option is not set, and this corresponds to the
     /// `CURLOPT_SEEKFUNCTION` and `CURLOPT_SEEKDATA` options.
     fn seek(&mut self, whence: SeekFrom) -> SeekResult {
-        drop(whence);
+        let _ = whence; // ignore unused
         SeekResult::CantSeek
     }
 
@@ -186,7 +186,7 @@ pub trait Handler {
     /// By default this option is not set and corresponds to the
     /// `CURLOPT_HEADERFUNCTION` and `CURLOPT_HEADERDATA` options.
     fn header(&mut self, data: &[u8]) -> bool {
-        drop(data);
+        let _ = data; // ignore unused
         true
     }
 
@@ -222,7 +222,7 @@ pub trait Handler {
     /// By default this function calls an internal method and corresponds to
     /// `CURLOPT_PROGRESSFUNCTION` and `CURLOPT_PROGRESSDATA`.
     fn progress(&mut self, dltotal: f64, dlnow: f64, ultotal: f64, ulnow: f64) -> bool {
-        drop((dltotal, dlnow, ultotal, ulnow));
+        let _ = (dltotal, dlnow, ultotal, ulnow); // ignore unused
         true
     }
 
@@ -453,12 +453,11 @@ pub enum HttpVersion {
     V2PriorKnowledge = curl_sys::CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE as isize,
 
     /// Setting this value will make libcurl attempt to use HTTP/3 directly to
-    /// server given in the URL. Note that this cannot gracefully downgrade to
-    /// earlier HTTP version if the server doesn't support HTTP/3.
+    /// server given in the URL but fallback to earlier HTTP versions if the HTTP/3
+    /// connection establishment fails.
     ///
-    /// For more reliably upgrading to HTTP/3, set the preferred version to
-    /// something lower and let the server announce its HTTP/3 support via
-    /// Alt-Svc:.
+    /// Note: the meaning of this settings depends on the linked libcurl.
+    /// For CURL < 7.88.0, there is no fallback if HTTP/3 connection fails.
     ///
     /// (Added in CURL 7.66.0)
     V3 = curl_sys::CURL_HTTP_VERSION_3 as isize,

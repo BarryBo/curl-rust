@@ -87,7 +87,7 @@ fn main() {
             .replace("@LIBCURL_LIBS@", "")
             .replace("@SUPPORT_FEATURES@", "")
             .replace("@SUPPORT_PROTOCOLS@", "")
-            .replace("@CURLVERSION@", "8.1.2"),
+            .replace("@CURLVERSION@", "8.3.0"),
     )
     .unwrap();
 
@@ -132,10 +132,10 @@ fn main() {
         .file("curl/lib/cookie.c")
         .file("curl/lib/curl_addrinfo.c")
         .file("curl/lib/curl_get_line.c")
-        .file("curl/lib/curl_log.c")
         .file("curl/lib/curl_memrchr.c")
         .file("curl/lib/curl_range.c")
         .file("curl/lib/curl_threads.c")
+        .file("curl/lib/curl_trc.c")
         .file("curl/lib/doh.c")
         .file("curl/lib/dynbuf.c")
         .file("curl/lib/dynhds.c")
@@ -167,6 +167,7 @@ fn main() {
         .file("curl/lib/llist.c")
         .file("curl/lib/md5.c")
         .file("curl/lib/mime.c")
+        .file("curl/lib/macos.c")
         .file("curl/lib/mprintf.c")
         .file("curl/lib/mqtt.c")
         .file("curl/lib/multi.c")
